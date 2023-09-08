@@ -1,30 +1,29 @@
 import { OpenAI } from "openai";
-import PDFParser from "pdf2json";
-import { Message, OpenAIStream, StreamingTextResponse } from "ai";
-import { PdfReader } from "pdfreader";
-import { NextResponse } from "next/server";
+import { OpenAIStream, StreamingTextResponse } from "ai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 type MessageRole = OpenAI.Chat.Completions.ChatCompletionMessage["role"];
 
 function buildPrompt(resumeText: string): OpenAI.Chat.Completions.ChatCompletionMessage[] {
-  const resumeContent = resumeText.split("\n").map((message) => ({
-    role: "user" as MessageRole,
-    content: message
-  }));
-
-  const inquires = [
-    {
-      role: "user" as MessageRole,
-      content: "Generate a LinkedIn About section"
-    }
-  ];
-
   const systemMessages = [
     {
       role: "system" as MessageRole,
       content: "You are a helpful college mentor. Below is a resume of a student. Read it"
+    }
+  ];
+
+  const resumeContent = [
+    {
+      role: "user" as MessageRole,
+      content: resumeText
+    }
+  ];
+
+  const inquires = [
+    {
+      role: "user" as MessageRole,
+      content: "Generate a medium-length LinkedIn About section"
     }
   ];
 
@@ -33,7 +32,6 @@ function buildPrompt(resumeText: string): OpenAI.Chat.Completions.ChatCompletion
 
 export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
-  // const { prompt } = await req.json();
   const { prompt } = await req.json();
 
   // Request the OpenAI API for the response based on the prompt
@@ -42,9 +40,9 @@ export async function POST(req: Request) {
     stream: true,
     messages: buildPrompt(prompt),
     max_tokens: 500,
-    temperature: 0.7,
+    temperature: 0.9,
     top_p: 1,
-    frequency_penalty: 1,
+    frequency_penalty: 1.5,
     presence_penalty: 1
   });
 

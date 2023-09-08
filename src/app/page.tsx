@@ -47,6 +47,7 @@ export default function Page() {
 
       const { text } = await res.json();
 
+      // AI helper from vercel
       complete(text);
     } catch (error) {
       console.error("something went wrong, check your console.");
